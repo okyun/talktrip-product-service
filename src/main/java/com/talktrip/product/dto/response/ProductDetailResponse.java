@@ -2,11 +2,11 @@ package com.talktrip.product.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.talktrip.product.entity.Product;
-import com.talktrip.product.entity.ProductImage;
 import com.talktrip.product.entity.ProductOption;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 public record ProductDetailResponse(
@@ -29,9 +29,10 @@ public record ProductDetailResponse(
         String email,
         String phoneNum
 ) {
-    public static ProductDetailResponse fromProduct(Product product, boolean isLiked) {
+    public static ProductDetailResponse fromProduct(Product product, boolean isLiked, List<String> imageUrls) {
         List<ProductOption> futureOptions = product.getProductOptions().stream()
                 .filter(option -> option.getStartDate() == null || !option.getStartDate().isBefore(LocalDate.now()))
+                .sorted(Comparator.comparing(ProductOption::getStartDate, Comparator.nullsFirst(Comparator.naturalOrder())))
                 .toList();
 
         ProductOption minPriceStock = product.getMinPriceOption();
@@ -49,11 +50,11 @@ public record ProductDetailResponse(
                 product.getUpdatedAt(),
                 product.getThumbnailImageUrl(),
                 countryLabel,
-                List.of(),
-                product.getImages().stream().map(ProductImage::getImageUrl).toList(),
+                List.<String>of(),
+                imageUrls,
                 futureOptions.stream().map(ProductOptionResponse::from).toList(),
                 0f,
-                List.of(),
+                List.<ReviewResponse>of(),
                 isLiked,
                 "seller:" + product.getSellerId(),
                 "",

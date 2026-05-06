@@ -54,8 +54,9 @@ public class ProductCatalogService {
         if (product.getTotalStock() <= 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "product not found");
         }
+        List<String> imageUrls = productRepository.findImageUrlsByProductId(productId);
         boolean liked = false;
-        return ProductDetailResponse.fromProduct(product, liked);
+        return ProductDetailResponse.fromProduct(product, liked, imageUrls);
     }
 
     @Transactional(readOnly = true)
